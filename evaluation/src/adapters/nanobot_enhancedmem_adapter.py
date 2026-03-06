@@ -4,7 +4,7 @@ Nanobot EnhancedMem Adapter - bridge EverMemOS4Eval evaluation to nanobot-memory
 This adapter:
 - Uses nanobot's EnhancedMem backend as the memory system
 - Reuses nanobot's composed memory context (`EnhancedMemStore.get_memory_context(query)`)
-- Delegates answer generation and evaluation to the existing evaluation framework
+- Generates answers using the same LLM + prompt as other adapters (e.g. answer_prompt_memos)
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from typing import Any, Dict, List
 from evaluation.src.adapters.base import BaseAdapter
 from evaluation.src.adapters.registry import register_adapter
 from evaluation.src.core.data_models import Conversation, SearchResult
+from evaluation.src.utils.config import load_yaml
 
 
 @register_adapter("nanobot_enhancedmem")
@@ -30,6 +31,24 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
         self._nanobot_imported = False
         self._runner_cls = None
         self._provider_cls = None
+
+        # Answer generation: use evaluation framework's LLM + prompt (same as online adapters)
+        from memory_layer.llm.llm_provider import LLMProvider as EvalLLMProvider
+
+        llm_cfg = config.get("llm", {})
+        self._answer_llm = EvalLLMProvider(
+            provider_type=llm_cfg.get("provider", "openai"),
+            model=llm_cfg.get("model", "gpt-4o-mini"),
+            api_key=llm_cfg.get("api_key", ""),
+            base_url=llm_cfg.get(
+                "base_url", os.getenv("LLM_BASE_URL", "https://api.openai.com/v1")
+            ),
+            temperature=float(llm_cfg.get("temperature", 0.0)),
+            max_tokens=int(llm_cfg.get("max_tokens", 32768)),
+        )
+        eval_root = Path(__file__).resolve().parents[2]
+        prompts_path = eval_root / "config" / "prompts.yaml"
+        self._prompts = load_yaml(str(prompts_path))
 
     # -------------------------------------------------------------------------
     # Internal helpers
@@ -188,13 +207,30 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
         )
 
     async def answer(self, query: str, context: str, **kwargs) -> str:
-        """Answer stage: let evaluation framework's LLM handle answer generation.
-
-        For this adapter, we do not override answer; the framework will call
-        its own LLM provider with `formatted_context` from search results.
-        """
-        # This adapter does not implement its own answering logic; return empty
-        # and rely on the evaluation framework's answer stage.
+        """Generate answer from context using evaluation framework's LLM + prompt."""
+        prompt_template = self._prompts.get("online_api", {}).get("default", {}).get(
+            "answer_prompt_memos", ""
+        )
+        if not prompt_template:
+            return ""
+        prompt = prompt_template.format(context=context, question=query)
+        max_retries = self.config.get("answer", {}).get("max_retries", 3)
+        for attempt in range(max_retries):
+            try:
+                result = await self._answer_llm.generate(
+                    prompt=prompt, temperature=0, max_tokens=256
+                )
+                if not result:
+                    continue
+                result = result.strip()
+                if "FINAL ANSWER:" in result:
+                    parts = result.split("FINAL ANSWER:")
+                    result = parts[-1].strip() if len(parts) > 1 else result
+                return result
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    return f"Error: {e}"
+                continue
         return ""
 
     def get_system_info(self) -> Dict[str, Any]:
