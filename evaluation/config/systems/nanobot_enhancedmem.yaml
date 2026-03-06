@@ -7,7 +7,7 @@ description: "nanobot-memory EnhancedMem backend evaluated via EverMemOS4Eval"
 adapter: "nanobot_enhancedmem"
 
 # Path to the nanobot-memory repository (can be overridden by NANOBOT_MEMORY_REPO env)
-nanobot_memory_repo_path: "${NANOBOT_MEMORY_REPO}$"
+nanobot_memory_repo_path: "${NANOBOT_MEMORY_REPO}"
 
 # LLM configuration used by nanobot EnhancedMem (for extraction/compression)
 llm:
