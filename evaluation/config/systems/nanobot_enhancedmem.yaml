@@ -1,0 +1,23 @@
+# Nanobot EnhancedMem System Configuration
+
+name: "nanobot_enhancedmem"
+version: "0.1"
+description: "nanobot-memory EnhancedMem backend evaluated via EverMemOS4Eval"
+
+adapter: "nanobot_enhancedmem"
+
+# Path to the nanobot-memory repository (can be overridden by NANOBOT_MEMORY_REPO env)
+nanobot_memory_repo_path: "${NANOBOT_MEMORY_REPO}$"
+
+# LLM configuration used by nanobot EnhancedMem (for extraction/compression)
+llm:
+  provider: "openai"
+  model: "claude-sonnet-4-6"
+  api_key: "${LLM_API_KEY}"
+  base_url: "${LLM_BASE_URL}"
+
+# Optional EnhancedMem runner configs
+memory_window: 20
+memory_consolidate_interval: null
+memory_consolidate_after_turn: true
+

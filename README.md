@@ -31,6 +31,21 @@
 
 </div>
 
+> **EverMemOS4Eval fork**：用于复用 EverMemOS 的 evaluation pipeline，对 `nanobot-memory` 的 EnhancedMem 长期记忆做自动化评测（ingest → 形成记忆 → query 检索 → answer/judge）。
+
+```
+# 修改env中的llm配置
+cp env.example .env
+
+# 配置nanobot_enhancedmem需要的llm
+export LLM_API_KEY=xxx
+export LLM_BASE_URL=xxx
+export  NANOBOT_MEMORY_REPO=xxx
+
+uv sync --group evaluation
+
+uv run python -m evaluation.cli --dataset locomo --system nanobot_enhancedmem --smoke --smoke-messages 10 --smoke-questions 3
+```
 <br>
 
 [![Image](https://github.com/user-attachments/assets/739a0939-ab1d-4659-81c4-0842466afde9)](https://luma.com/n88icl03)

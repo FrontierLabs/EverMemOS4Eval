@@ -13,6 +13,7 @@ _ADAPTER_REGISTRY: Dict[str, Type[BaseAdapter]] = {}
 _ADAPTER_MODULES = {
     # Local systems
     "evermemos": "evaluation.src.adapters.evermemos_adapter",
+    "nanobot_enhancedmem": "evaluation.src.adapters.nanobot_enhancedmem_adapter",
     
     # Online API systems
     "mem0": "evaluation.src.adapters.mem0_adapter",
