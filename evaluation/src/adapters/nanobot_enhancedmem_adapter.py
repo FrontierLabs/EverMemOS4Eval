@@ -13,6 +13,7 @@ import importlib
 import os
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Dict, List
 
 from evaluation.src.adapters.base import BaseAdapter
@@ -108,6 +109,12 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
             default_model=model,
         )
 
+        # Build EnhancedMem config from YAML (retrieve_method, bm25_*, etc.)
+        em_config = SimpleNamespace(
+            retrieve_method=self.config.get("retrieve_method", "lightest"),
+            bm25_min_score_ratio=self.config.get("bm25_min_score_ratio", 0.1),
+            bm25_min_score_absolute=self.config.get("bm25_min_score_absolute", 0.01),
+        )
         runner = self._runner_cls(
             workspace=workspace,
             provider=provider,
@@ -119,7 +126,7 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
             memory_consolidate_after_turn=self.config.get(
                 "memory_consolidate_after_turn", False
             ),
-            config=None,
+            config=em_config,
         )
         return runner
 

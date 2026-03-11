@@ -12,7 +12,7 @@ nanobot_memory_repo_path: "${NANOBOT_MEMORY_REPO}"
 # LLM configuration used by nanobot EnhancedMem (for extraction/compression)
 llm:
   provider: "openai"
-  model: "claude-sonnet-4-6"
+  model: "gpt-4.1-mini"
   api_key: "${LLM_API_KEY}"
   base_url: "${LLM_BASE_URL}"
 
@@ -20,4 +20,6 @@ llm:
 memory_window: 20
 memory_consolidate_interval: null
 memory_consolidate_after_turn: true
-
+retrieve_method: "bm25"
+bm25_min_score_ratio: 0.1
+bm25_min_score_absolute: 0.01
