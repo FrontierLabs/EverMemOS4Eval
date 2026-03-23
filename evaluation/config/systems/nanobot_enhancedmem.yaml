@@ -17,9 +17,9 @@ llm:
   base_url: "${LLM_BASE_URL}"
 
 # Optional EnhancedMem runner configs
-memory_window: 20
-memory_consolidate_interval: null
-memory_consolidate_after_turn: true
+memory_window: 40
+memory_consolidate_interval: 26
+memory_consolidate_after_turn: 0
 retrieve_method: "bm25"
 bm25_min_score_ratio: 0.1
 bm25_min_score_absolute: 0.01

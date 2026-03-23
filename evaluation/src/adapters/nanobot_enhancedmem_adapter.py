@@ -124,7 +124,7 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
                 "memory_consolidate_interval", None
             ),
             memory_consolidate_after_turn=self.config.get(
-                "memory_consolidate_after_turn", False
+                "memory_consolidate_after_turn", 0
             ),
             config=em_config,
         )
@@ -157,11 +157,13 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
                 role = "user"
                 if msg.speaker_name.lower() in ("assistant", "system", "bot"):
                     role = "assistant"
+                session_key = msg.metadata.get("session")
                 messages.append(
                     self._runner_message_cls(
                         role=role,
                         content=msg.content,
                         timestamp=msg.timestamp,
+                        session_key=session_key,
                     )
                 )
 
