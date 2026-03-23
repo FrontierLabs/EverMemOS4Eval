@@ -190,7 +190,7 @@ class NanobotEnhancedMemAdapter(BaseAdapter):
         ws_path = Path(workspaces[conversation_id])
         runner = self._make_runner(ws_path)
 
-        ctx = runner.get_memory_context(query)
+        ctx = runner.get_memory_context(query, use_profiles=True)
         # Keep Nanobot-style wrapper
         formatted_context = f"# Memory\n\n{ctx}" if ctx else ""
 
